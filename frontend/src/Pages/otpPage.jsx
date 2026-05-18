@@ -47,7 +47,7 @@ const OtpPage = () => {
   const handleSubmit = async () => {
     const finalOtp = otp.join("");
     try {
-      const res = await axios.post("http://localhost:8000/api/user/verify-otp", {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/user/verify-otp`, {
         email,
         phone,
         otp: finalOtp,

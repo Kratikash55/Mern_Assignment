@@ -8,7 +8,7 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     try {
-     const res = await axios.post("http://localhost:8000/api/user/signup",
+     const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/user/signup`,
   {
     email: input.includes("@") ? input : "",
   phone: !input.includes("@") ? input : "",
@@ -38,11 +38,11 @@ else {
           {/* Card Image */}
           <div className="flex items-center justify-center h-full">
             <div className="w-[690px] h-[960px] ml-8 mt-8 mb-8 rounded-[32px] border border-gray-300 overflow-hidden relative">
-  <img
-    src="/assets/Frame.png"
-    alt="Background"
-    className="w-full h-full object-cover"
-  />
+          <img
+          src="/assets/Frame.png"
+           alt="Background"
+          className="w-full h-full object-cover"
+          />
 </div>
           </div>
         </div>

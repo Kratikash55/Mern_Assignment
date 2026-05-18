@@ -20,7 +20,7 @@ const SideNav = () => {
 
  <div className="px-4 py-3 border-b border-gray-700">
   <div className="relative w-[224px] h-[34px]">
-    {/* Icon inside input */}
+    
     <IoIosSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
 
     {/* Input */}

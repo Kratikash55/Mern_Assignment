@@ -26,7 +26,7 @@ const AddProductForm = ({ onClose, onAddProduct, initialData }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // ✅ Basic validation
+    
     if (
       !formData.name ||
       !formData.type ||
@@ -46,10 +46,8 @@ const AddProductForm = ({ onClose, onAddProduct, initialData }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg relative mx-auto my-8 
-                 max-h-[80vh] overflow-y-auto"
-    >
-      {/* ✅ Top bar with title + cross */}
+      className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg relative mx-auto my-8 max-h-[80vh] overflow-y-auto" >
+     
       <div className="flex justify-between items-center mb-6 sticky top-0 bg-white z-10">
         <h2 className="text-xl font-semibold text-gray-700">
           {formData._id ? "Edit Product" : "Add Product"}
@@ -63,7 +61,7 @@ const AddProductForm = ({ onClose, onAddProduct, initialData }) => {
         </button>
       </div>
 
-      {/* Product Name */}
+     
       <label className="block mb-2 text-sm font-medium text-gray-600">
         Product Name
       </label>
@@ -76,7 +74,7 @@ const AddProductForm = ({ onClose, onAddProduct, initialData }) => {
         placeholder="Enter product name"
       />
 
-      {/* Product Type (Dropdown) */}
+     
       <label className="block mb-2 text-sm font-medium text-gray-600">
         Product Type
       </label>
@@ -93,7 +91,7 @@ const AddProductForm = ({ onClose, onAddProduct, initialData }) => {
         <option value="Other">Other</option>
       </select>
 
-      {/* Stock */}
+      
       <label className="block mb-2 text-sm font-medium text-gray-600">
         Quantity Stock
       </label>
@@ -106,7 +104,7 @@ const AddProductForm = ({ onClose, onAddProduct, initialData }) => {
         placeholder="Enter stock quantity"
       />
 
-      {/* MRP */}
+      
       <label className="block mb-2 text-sm font-medium text-gray-600">
         MRP
       </label>
@@ -119,7 +117,6 @@ const AddProductForm = ({ onClose, onAddProduct, initialData }) => {
         placeholder="Enter MRP"
       />
 
-      {/* Selling Price */}
       <label className="block mb-2 text-sm font-medium text-gray-600">
         Selling Price
       </label>
@@ -132,7 +129,7 @@ const AddProductForm = ({ onClose, onAddProduct, initialData }) => {
         placeholder="Enter selling price"
       />
 
-      {/* Brand */}
+      
       <label className="block mb-2 text-sm font-medium text-gray-600">
         Brand Name
       </label>
@@ -145,7 +142,7 @@ const AddProductForm = ({ onClose, onAddProduct, initialData }) => {
         placeholder="Enter brand name"
       />
 
-      {/* Image Upload */}
+      
       <label className="block mb-2 text-sm font-medium text-gray-600">
         Upload Product Images
       </label>
@@ -156,7 +153,7 @@ const AddProductForm = ({ onClose, onAddProduct, initialData }) => {
         className="w-full border p-2 mb-4 rounded focus:ring-2 focus:ring-blue-400"
       />
 
-      {/* Description */}
+     
       <label className="block mb-2 text-sm font-medium text-gray-600">
         Description
       </label>
@@ -168,7 +165,7 @@ const AddProductForm = ({ onClose, onAddProduct, initialData }) => {
         placeholder="Enter product description"
       />
 
-      {/* Return Eligible */}
+      
       <label className="block mb-2 text-sm font-medium text-gray-600">
         Exchange or return eligibility
       </label>
@@ -183,7 +180,7 @@ const AddProductForm = ({ onClose, onAddProduct, initialData }) => {
         <option value="No">No</option>
       </select>
 
-      {/* Buttons */}
+    
       <div className="flex justify-end gap-3 sticky bottom-0 bg-white py-2">
         <button
           type="button"

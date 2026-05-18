@@ -5,10 +5,9 @@ const TopNav = ({ user, pageTitle }) => {
   const firstLetter = user?.email ? user.email.charAt(0).toUpperCase() : "";
 
   return (
-    <div className="w-full h-[64px] flex items-center justify-between px-6 border-b border-gray-300 
-                    bg-gradient-to-r from-pink-100 via-yellow-50 to-blue-100">
+    <div className="w-full h-[64px] flex items-center justify-between px-6 border-b border-gray-300 bg-gradient-to-r from-pink-100 via-yellow-50 to-blue-100">
       
-      {/* Left side: Page Title + Icon */}
+      {/* Left side */}
       <div className="flex items-center gap-2">
         {pageTitle === "Products" && (
           <>
@@ -18,7 +17,7 @@ const TopNav = ({ user, pageTitle }) => {
         )}
       </div>
 
-      {/* Right side: Profile */}
+      {/* Right side */}
       <div className="flex items-center gap-2 cursor-pointer">
         {user?.photoURL ? (
           <img

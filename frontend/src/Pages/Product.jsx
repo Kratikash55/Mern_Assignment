@@ -103,7 +103,7 @@ const Products = ({ user }) => {
   const handleDelete = async (id, index) => {
     if (!id) return;
     try {
-      await fetch(`http://localhost:8000/api/products/${id}`, { method: "DELETE" });
+      await fetch(`${import.meta.env.VITE_API_URL}/api/products/${id}`, { method: "DELETE" });
       const updated = [...products];
       updated.splice(index, 1);
       setProducts(updated);

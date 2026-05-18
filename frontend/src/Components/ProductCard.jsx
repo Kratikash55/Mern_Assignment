@@ -7,7 +7,7 @@ const ProductCard = ({ product, onPublishToggle, onEdit, onDelete }) => {
       <img
         src={
           product.image
-            ? `http://localhost:8000/uploads/${product.image}`
+            ? `${import.meta.env.VITE_API_URL}/uploads/${product.image}`
             : "/placeholder.png"
         }
         alt={product.name}

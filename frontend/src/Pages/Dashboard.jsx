@@ -12,7 +12,7 @@ const Dashboard = ({ user }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/products");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
         const data = await res.json();
         setProducts(data);
       } catch (error) {
