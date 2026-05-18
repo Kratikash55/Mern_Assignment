@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import axios from "axios";
+import nodemailer from "nodemailer";
 
 // ================= SIGNUP WITH OTP =================
 export const signupWithOtp = async (req, res) => {
@@ -20,12 +21,14 @@ export const signupWithOtp = async (req, res) => {
       100000 + Math.random() * 900000
     ).toString();
 
+    console.log("✅ GENERATED OTP:", otp);
+
     // Find existing user
     let user = await User.findOne({
       $or: [{ email }, { phone }],
     });
 
-    // Create user if not exists
+    // Create or update user
     if (!user) {
 
       user = new User({
@@ -44,20 +47,56 @@ export const signupWithOtp = async (req, res) => {
     // Save user
     await user.save();
 
-    console.log("✅ User Saved");
-    console.log("✅ Generated OTP:", otp);
+    console.log("✅ USER SAVED");
 
-    // ================= EMAIL LOGIN =================
+    // ================= EMAIL OTP =================
     if (email) {
+
+      console.log("📩 EMAIL:", email);
+
+      // Create transporter
+      const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      // Verify transporter
+      await transporter.verify();
+
+      console.log("✅ SMTP CONNECTED");
+
+      // Send mail
+      const info = await transporter.sendMail({
+        from: `"Productr" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: "Your OTP Code",
+
+        html: `
+          <div style="font-family:sans-serif;padding:20px;">
+            <h2>Your OTP is: ${otp}</h2>
+            <p>This OTP will expire in 5 minutes.</p>
+          </div>
+        `,
+      });
+
+      console.log("✅ EMAIL SENT SUCCESSFULLY");
+      console.log(info);
 
       return res.status(200).json({
         message: "OTP sent to email",
-        otp,
       });
     }
 
-    // ================= PHONE LOGIN =================
+    // ================= PHONE OTP =================
     if (phone) {
+
+      console.log("📱 PHONE:", phone);
 
       try {
 
@@ -80,7 +119,7 @@ export const signupWithOtp = async (req, res) => {
           }
         );
 
-        console.log("✅ OTP SMS Sent");
+        console.log("✅ OTP SMS SENT");
 
         return res.status(200).json({
           message: "OTP sent to phone",
@@ -88,7 +127,7 @@ export const signupWithOtp = async (req, res) => {
 
       } catch (smsError) {
 
-        console.log("SMS ERROR:", smsError);
+        console.log("❌ SMS ERROR:", smsError);
 
         return res.status(500).json({
           message: "Failed to send phone OTP",
@@ -98,7 +137,8 @@ export const signupWithOtp = async (req, res) => {
 
   } catch (error) {
 
-    console.log("SERVER ERROR:", error);
+    console.log("❌ SERVER ERROR:");
+    console.log(error);
 
     return res.status(500).json({
       message: error.message,
@@ -112,6 +152,8 @@ export const verifyOtp = async (req, res) => {
   try {
 
     const { email, phone, otp } = req.body;
+
+    console.log("✅ VERIFY OTP:", otp);
 
     const user = await User.findOne({
       $or: [{ email }, { phone }],
@@ -140,12 +182,15 @@ export const verifyOtp = async (req, res) => {
 
     await user.save();
 
+    console.log("✅ USER VERIFIED");
+
     return res.status(200).json({
       message: "Signup successful",
     });
 
   } catch (error) {
 
+    console.log("❌ VERIFY ERROR:");
     console.log(error);
 
     return res.status(500).json({
