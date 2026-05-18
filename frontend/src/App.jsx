@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
-import OtpPage from "./Pages/otpPage";
-import Dashboard from "./Pages/Dashboard";
-import Products from "./Pages/Product";
+import LoginPage from "./Pages/LoginPage.jsx";
+import OtpPage from "./Pages/otpPage.jsx";
+import Dashboard from "./Pages/Dashboard.jsx";
+import Products from "./Pages/Product.jsx";
+
 
 function App() {
   return (
