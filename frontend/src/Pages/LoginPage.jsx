@@ -6,26 +6,64 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [input, setInput] = useState("");
 
-  const handleLogin = async () => {
-    try {
-     const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/user/signup`,
-  {
-    email: input.includes("@") ? input : "",
-  phone: !input.includes("@") ? input : "",
-  }
-);
+//   const handleLogin = async () => {
 
-      if (res.data.message === "OTP sent to email" || res.data.message === "OTP sent to phone") {
-  navigate("/otp", { state: { email: input.includes("@") ? input : "", phone: !input.includes("@") ? input : "" } });
-}
-else {
-        alert("Login failed: " + res.data.message);
-      }
-    } catch (err) {
-      console.error(err.response?.data?.message || "Error logging in");
-    }
-  };
+//     try {
+//      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/user/signup`,
+//   {
+//     email: input.includes("@") ? input : "",
+//   phone: !input.includes("@") ? input : "",
+//   }
+// );
+
+//    if (res.data.message === "OTP sent to email" || res.data.message === "OTP sent to phone") {
+//   navigate("/otp", { state: { email: input.includes("@") ? input : "", phone: !input.includes("@") ? input : "" } });
+//   setInput("");
+// }
+// else {
+//         alert("Login failed: " + res.data.message);
+//       }
+//     } catch (err) {
+//       console.error(err.response?.data?.message || "Error logging in");
+//     }
+//   };
   
+const handleLogin = async () => {
+
+  console.log("Button clicked");
+
+  try {
+
+    const res = await axios.post(
+      "https://mern-assignment-3-ykxd.onrender.com/api/user/signup",
+      {
+        email: input.includes("@") ? input : "",
+        phone: !input.includes("@") ? input : "",
+      }
+    );
+
+    console.log("API RESPONSE:", res.data);
+
+    if (
+      res.data.message === "OTP sent to email" ||
+      res.data.message === "OTP sent to phone"
+    ) {
+
+      navigate("/otp");
+
+    } else {
+
+      alert(res.data.message);
+    }
+
+  } catch (err) {
+
+    console.log("FULL ERROR:", err);
+
+    alert("Login Failed");
+  }
+};
+
   return (
     <div className="flex min-h-screen bg-[#f4f4f4]">
       

@@ -1,85 +1,155 @@
 import User from "../models/User.js";
-import nodemailer from "nodemailer";
+import axios from "axios";
 
-
-// Signup with OTP
+// ================= SIGNUP WITH OTP =================
 export const signupWithOtp = async (req, res) => {
+
   try {
+
     const { email, phone } = req.body;
 
+    // Validation
     if (!email && !phone) {
-      return res.status(400).json({ message: "Email or phone required" });
+      return res.status(400).json({
+        message: "Email or phone required",
+      });
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate OTP
+    const otp = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
 
-    let user = await User.findOne({ $or: [{ email }, { phone }] });
+    // Find existing user
+    let user = await User.findOne({
+      $or: [{ email }, { phone }],
+    });
+
+    // Create user if not exists
     if (!user) {
-      user = new User({ email, phone, otp, otpExpires: Date.now() + 5 * 60 * 1000 });
+
+      user = new User({
+        email: email || "",
+        phone: phone || "",
+        otp,
+        otpExpires: Date.now() + 5 * 60 * 1000,
+      });
+
     } else {
+
       user.otp = otp;
       user.otpExpires = Date.now() + 5 * 60 * 1000;
     }
+
+    // Save user
     await user.save();
 
-    // Email OTP
+    console.log("✅ User Saved");
+    console.log("✅ Generated OTP:", otp);
+
+    // ================= EMAIL LOGIN =================
     if (email) {
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
 
-      await transporter.sendMail({
-        from: `"Productr" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: "Your Productr OTP Code",
-        html: `<h2>Your OTP is ${otp}</h2><p>This code will expire in 5 minutes.</p>`,
+      return res.status(200).json({
+        message: "OTP sent to email",
+        otp,
       });
-
-      return res.json({ message: "OTP sent to email" });
     }
 
-    // Phone OTP (Fast2SMS)
+    // ================= PHONE LOGIN =================
     if (phone) {
-      await axios.post("https://www.fast2sms.com/dev/bulkV2", {}, {
-        headers: { authorization: process.env.FAST2SMS_API_KEY },
-        params: {
-          route: "v3",
-          sender_id: "TXTIND",
-          message: `Your OTP is ${otp}`,
-          language: "english",
-          numbers: phone,
-        },
-      });
 
-      return res.json({ message: "OTP sent to phone" });
+      try {
+
+        await axios.post(
+          "https://www.fast2sms.com/dev/bulkV2",
+          {},
+          {
+            headers: {
+              authorization:
+                process.env.FAST2SMS_API_KEY,
+            },
+
+            params: {
+              route: "v3",
+              sender_id: "TXTIND",
+              message: `Your OTP is ${otp}`,
+              language: "english",
+              numbers: phone,
+            },
+          }
+        );
+
+        console.log("✅ OTP SMS Sent");
+
+        return res.status(200).json({
+          message: "OTP sent to phone",
+        });
+
+      } catch (smsError) {
+
+        console.log("SMS ERROR:", smsError);
+
+        return res.status(500).json({
+          message: "Failed to send phone OTP",
+        });
+      }
     }
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+
+    console.log("SERVER ERROR:", error);
+
+    return res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
-
-// Verify OTP
+// ================= VERIFY OTP =================
 export const verifyOtp = async (req, res) => {
-  try {
-    const { email, phone, otp } = req.body;
-    const user = await User.findOne({ $or: [{ email }, { phone }] });
 
-    if (!user) return res.status(404).json({ message: "User not found" });
-    if (Date.now() > user.otpExpires) return res.status(400).json({ message: "OTP expired" });
-    if (user.otp !== otp) return res.status(400).json({ message: "Invalid OTP" });
+  try {
+
+    const { email, phone, otp } = req.body;
+
+    const user = await User.findOne({
+      $or: [{ email }, { phone }],
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    if (Date.now() > user.otpExpires) {
+      return res.status(400).json({
+        message: "OTP expired",
+      });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
+    }
 
     user.otp = null;
     user.isVerified = true;
+
     await user.save();
 
-    return res.json({ message: "Signup successful" });
+    return res.status(200).json({
+      message: "Signup successful",
+    });
+
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+
+    console.log(error);
+
+    return res.status(500).json({
+      message: "Server error",
+    });
   }
 };
