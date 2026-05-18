@@ -12,11 +12,11 @@ const Products = ({ user }) => {
   const [editProduct, setEditProduct] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  // ✅ Fetch products from backend on mount
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/products");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
         const data = await res.json();
         setProducts(data);
       } catch (error) {
@@ -26,7 +26,7 @@ const Products = ({ user }) => {
     fetchProducts();
   }, []);
 
-  // ✅ Add product
+  
   const handleAddProduct = async (newProduct) => {
     try {
       const formData = new FormData();
@@ -42,7 +42,8 @@ const Products = ({ user }) => {
         formData.append("image", newProduct.image);
       }
 
-      const res = await fetch("http://localhost:8000/api/products", {
+      // no headers, browser sets multipart/form-data with boundary
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`, {
         method: "POST",
         body: formData, // ✅ no headers, multer will parse
       });
@@ -60,10 +61,10 @@ const Products = ({ user }) => {
     }
   };
 
-  // ✅ Update product (PUT request to backend)
+  // Update product (PUT request to backend)
   const handleUpdateProduct = async (updatedProduct) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/products/${updatedProduct._id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products/${updatedProduct._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedProduct),
@@ -77,11 +78,11 @@ const Products = ({ user }) => {
     }
   };
 
-  // ✅ Toggle publish status
+  // Toggle publish status
   const togglePublish = async (id, index) => {
     if (!id) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/products/${id}/publish`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products/${id}/publish`, {
         method: "PUT",
       });
       const updatedProduct = await res.json();
@@ -93,13 +94,13 @@ const Products = ({ user }) => {
     }
   };
 
-  // ✅ Edit product
+  //  Edit product
   const handleEdit = (product) => {
     setEditProduct(product);
     setShowEditModal(true);
   };
 
-  // ✅ Delete product
+  //  Delete product
   const handleDelete = async (id, index) => {
     if (!id) return;
     try {
