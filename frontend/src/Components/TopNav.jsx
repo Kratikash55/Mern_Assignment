@@ -1,7 +1,7 @@
 import { MdOutlineShoppingBag } from "react-icons/md";
 
 const TopNav = ({ user, pageTitle }) => {
-  // ✅ Email ka first letter nikalna (agar email hai)
+  
   const firstLetter = user?.email ? user.email.charAt(0).toUpperCase() : "";
 
   return (

@@ -66,12 +66,12 @@ const OtpPage = () => {
   // Resend OTP
   const handleResend = async () => {
     try {
-      await axios.post("http://localhost:8000/api/user/signup", {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/user/signup`, {
         email,
         phone,
       });
       setCounter(20);
-      setError(""); // ✅ clear error when resend
+      setError(""); // 
     } catch (err) {
       setError("Error resending OTP" , err);
     }
