@@ -29,17 +29,18 @@ export const signupWithOtp = async (req, res) => {
     await user.save();
     console.log("✅ USER SAVED");
 
-    // ================= BREVO SMTP CONFIG =================
+    // ================= BREVO SMTP CONFIG (FIXED) =================
     const transporter = nodemailer.createTransport({
-      host: "://brevo.com",
+      // Agar Render par env variable nahi milega, toh automatic sahi string utha lega
+      host: process.env.EMAIL_HOST || "smtp-relay.brevo.com",
       port: 587,
       secure: false, 
       auth: {
-        user: process.env.EMAIL_USER, // Aapka Brevo email
-        pass: process.env.EMAIL_PASS, // Aapki Brevo SMTP Key
+        user: process.env.EMAIL_USER, 
+        pass: process.env.EMAIL_PASS, 
       },
       tls: {
-        rejectUnauthorized: false // Render ki network blocking se bachne ke liye
+        rejectUnauthorized: false 
       }
     });
 
