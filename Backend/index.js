@@ -10,10 +10,15 @@ dotenv.config();
 const app = express();
 
 // ✅ 1. Middlewares (Hamesha upar)
-app.use(cors({
-  origin: "http://localhost:5173", // Aapka frontend local URL
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://your-frontend-url.onrender.com"
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // ✅ 2. Routes
