@@ -9,32 +9,38 @@ import path from "path";
 dotenv.config();
 const app = express();
 
-// ✅ Middlewares
-app.use(cors());
-
+// ✅ 1. Middlewares (Hamesha upar)
+app.use(cors({
+  origin: "http://localhost:5173", // Aapka frontend local URL
+  credentials: true
+}));
 app.use(express.json());
 
-// ✅ Routes
+// ✅ 2. Routes
 app.use("/api/products", productRoutes);
 app.use("/api/user", contactRoutes);
 
-// ✅ Static uploads folder (safe path resolve)
+// ✅ 3. Static uploads folder
 app.use("/uploads", express.static(path.resolve("uploads")));
 
 const PORT = process.env.PORT || 8000;
 
-// ✅ Connect DB and start server
+// ✅ 4. Server ko pehle start karein (Taki Render connection fail na kare)
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
+});
+
+// ✅ 5. Database ko background me connect hone dein
 const connectDb = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URL)
+    if (!process.env.MONGODB_URL) {
+      throw new Error("MONGODB_URL environment variable is missing!");
+    }
+    await mongoose.connect(process.env.MONGODB_URL);
     console.log("✅ Connected to MongoDB");
-
-    app.listen(PORT, () => {
-      console.log(`🚀 Server is running on port ${PORT}`);
-    });
   } catch (error) {
     console.error("❌ Error connecting to MongoDB:", error.message);
-    process.exit(1); // stop app if DB fails
+    // Server ko kill nahi karenge taki logs chalu rahein
   }
 };
 

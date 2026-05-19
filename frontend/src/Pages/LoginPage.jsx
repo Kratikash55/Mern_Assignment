@@ -5,83 +5,63 @@ import { useNavigate } from "react-router-dom";
 const LoginPage = () => {
   const navigate = useNavigate();
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false); // Loading state for button
 
   const handleLogin = async () => {
+    if (!input.trim()) {
+      alert("Please enter email or phone number");
+      return;
+    }
 
+    setLoading(true);
     try {
-     const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/user/signup`,
-  {
-    email: input.includes("@") ? input : "",
-  phone: !input.includes("@") ? input : "",
-  }
-);
+     
+      const apiUrl = import.meta.env.VITE_API_URL || "https://mern-assignment-xnqd.onrender.com";
+      
+      const res = await axios.post(`${apiUrl}/api/user/signup`, {
+        email: input.includes("@") ? input.trim() : "",
+        phone: !input.includes("@") ? input.trim() : "",
+      });
 
-   if (res.data.message === "OTP sent to email" || res.data.message === "OTP sent to phone") {
-  navigate("/otp", { state: { email: input.includes("@") ? input : "", phone: !input.includes("@") ? input : "" } });
-  setInput("");
-}
-else {
+      console.log("👉 SERVER RESPONSE:", res.data);
+
+      if (res.data.message === "OTP sent to email" || res.data.message === "OTP sent to phone") {
+        // OTP Page par redirect karein aur data state me bhein
+        navigate("/otp", { 
+          state: { 
+            email: input.includes("@") ? input.trim() : "", 
+            phone: !input.includes("@") ? input.trim() : "" 
+          } 
+        });
+        setInput("");
+      } else {
         alert("Login failed: " + res.data.message);
       }
     } catch (err) {
-      console.error(err.response?.data?.message || "Error logging in");
+      console.error("❌ Login Error:", err);
+      // Agar backend se koi error message aaya hai toh wo dikhayein, nahi toh fallback message
+      const errorMsg = err.response?.data?.message || "Something went wrong. Please try again.";
+      alert("Error: " + errorMsg);
+    } finally {
+      setLoading(false);
     }
   };
-  
-// const handleLogin = async () => {
-
-//   console.log("Button clicked");
-
-//   try {
-
-//     const res = await axios.post(
-//       "https://mern-assignment-3-ykxd.onrender.com/api/user/signup",
-//       {
-//         email: input.includes("@") ? input : "",
-//         phone: !input.includes("@") ? input : "",
-//       }
-//     );
-
-//     console.log("API RESPONSE:", res.data);
-
-//     if (
-//       res.data.message === "OTP sent to email" ||
-//       res.data.message === "OTP sent to phone"
-//     ) {
-
-//       navigate("/otp");
-
-//     } else {
-
-//       alert(res.data.message);
-//     }
-
-//   } catch (err) {
-
-//     console.log("FULL ERROR:", err);
-
-//     alert("Login Failed");
-//   }
-// };
 
   return (
     <div className="flex min-h-screen bg-[#f4f4f4]">
       
       {/* Left Section */}
       <div className="ml-8 mt-8 rounded-[32px] overflow-hidden">
-        <div
-          className="h-full rounded-sm bg-cover bg-center  relative"
-        >
-
+        <div className="h-full rounded-sm bg-cover bg-center relative">
           {/* Card Image */}
           <div className="flex items-center justify-center h-full">
             <div className="w-[690px] h-[960px] ml-8 mt-8 mb-8 rounded-[32px] border border-gray-300 overflow-hidden relative">
-          <img
-          src="/assets/Frame.png"
-           alt="Background"
-          className="w-full h-full object-cover"
-          />
-</div>
+              <img
+                src="/assets/Frame.png"
+                alt="Background"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -102,6 +82,7 @@ else {
 
             <input
               type="text"
+              value={input}
               placeholder="Enter email or phone number"
               onChange={(e) => setInput(e.target.value)}
               className="w-full border border-gray-300 rounded-md px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400"
@@ -109,28 +90,29 @@ else {
           </div>
 
           <button 
-            className="w-full bg-[#0d1361] text-white py-3 rounded-md font-semibold hover:opacity-90 transition"
+            className="w-full bg-[#0d1361] text-white py-3 rounded-md font-semibold hover:opacity-90 transition disabled:bg-gray-400"
             onClick={handleLogin}
+            disabled={loading}
           >
-            Login
+            {loading ? "Sending OTP..." : "Login"}
           </button>
         </div>
 
         {/* Signup Box */}
         <div
-  className="absolute bottom-10 mb-10 w-[50%] border border-solid border-gray-300 rounded-md py-5 text-center bg-white"
-  style={{
-    backgroundImage: "radial-gradient(rgba(209,213,219,0.4) 1px, transparent 1px)",
-    backgroundSize: "12px 12px"
-  }}
->
-  <p className="text-sm text-gray-400">
-    Don't have a Productr Account
-  </p>
-  <a href="#" className="text-[#0d1361] font-semibold text-sm">
-    SignUp Here
-  </a>
-</div>
+          className="absolute bottom-10 mb-10 w-[50%] border border-solid border-gray-300 rounded-md py-5 text-center bg-white"
+          style={{
+            backgroundImage: "radial-gradient(rgba(209,213,219,0.4) 1px, transparent 1px)",
+            backgroundSize: "12px 12px"
+          }}
+        >
+          <p className="text-sm text-gray-400">
+            Don't have a Productr Account
+          </p>
+          <a href="#" className="text-[#0d1361] font-semibold text-sm">
+            SignUp Here
+          </a>
+        </div>
 
       </div>
     </div>
