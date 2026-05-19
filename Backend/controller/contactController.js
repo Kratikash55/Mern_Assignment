@@ -1,20 +1,18 @@
 import User from "../models/User.js";
-import nodemailer from "nodemailer"; // 1. कमेंट हटा दिया गया है
+import nodemailer from "nodemailer";
 
 export const signupWithOtp = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Validation
     if (!email) {
       return res.status(400).json({ message: "Email required" });
     }
 
-    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     console.log("✅ GENERATED OTP:", otp);
+    console.log("👉 TARGET EMAIL:", email);
 
-    // Find existing user or create new
     let user = await User.findOne({ email });
 
     if (!user) {
@@ -31,16 +29,18 @@ export const signupWithOtp = async (req, res) => {
     await user.save();
     console.log("✅ USER SAVED");
 
-    // ================= EMAIL OTP =================
-    
+    // ================= BREVO SMTP CONFIG =================
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com", 
-      port: 465,             
-      secure: true,          
+      host: "://brevo.com",
+      port: 587,
+      secure: false, 
       auth: {
-        user: process.env.EMAIL_USER, 
-        pass: process.env.EMAIL_PASS, 
+        user: process.env.EMAIL_USER, // Aapka Brevo email
+        pass: process.env.EMAIL_PASS, // Aapki Brevo SMTP Key
       },
+      tls: {
+        rejectUnauthorized: false // Render ki network blocking se bachne ke liye
+      }
     });
 
     await transporter.sendMail({
@@ -55,13 +55,11 @@ export const signupWithOtp = async (req, res) => {
       `,
     });
 
-    console.log("✅ EMAIL SENT SUCCESSFULLY");
-
-    
+    console.log("✅ EMAIL SENT SUCCESSFULLY VIA BREVO");
     return res.status(200).json({ message: "OTP sent to email" });
 
   } catch (error) {
-    console.log("❌ SERVER ERROR:", error);
+    console.log("❌ SERVER ERROR DURING MAIL:", error);
     return res.status(500).json({ message: error.message });
   }
 };
