@@ -1,6 +1,5 @@
 import User from "../models/User.js";
-import nodemailer from "nodemailer";
-import axios from "axios";
+import nodemailer from "nodemailer"; // 1. कमेंट हटा दिया गया है
 
 export const signupWithOtp = async (req, res) => {
   try {
@@ -15,7 +14,7 @@ export const signupWithOtp = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     console.log("✅ GENERATED OTP:", otp);
 
-    // Find existing user
+    // Find existing user or create new
     let user = await User.findOne({ email });
 
     if (!user) {
@@ -33,18 +32,16 @@ export const signupWithOtp = async (req, res) => {
     console.log("✅ USER SAVED");
 
     // ================= EMAIL OTP =================
+    
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
+      host: "smtp.gmail.com", 
+      port: 465,             
+      secure: true,          
       auth: {
-        user: process.env.EMAIL_USER, // Gmail address
-        pass: process.env.EMAIL_PASS, // Gmail App Password
+        user: process.env.EMAIL_USER, 
+        pass: process.env.EMAIL_PASS, 
       },
     });
-
-    await transporter.verify();
-    console.log("✅ SMTP CONNECTED");
 
     await transporter.sendMail({
       from: `"Productr" <${process.env.EMAIL_USER}>`,
@@ -60,13 +57,14 @@ export const signupWithOtp = async (req, res) => {
 
     console.log("✅ EMAIL SENT SUCCESSFULLY");
 
+    
     return res.status(200).json({ message: "OTP sent to email" });
+
   } catch (error) {
     console.log("❌ SERVER ERROR:", error);
     return res.status(500).json({ message: error.message });
   }
 };
-
 
 // ================= VERIFY OTP =================
 export const verifyOtp = async (req, res) => {
