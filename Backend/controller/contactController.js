@@ -3,6 +3,7 @@ import axios from "axios";
 
 // ================= SIGNUP WITH OTP =================
 export const signupWithOtp = async (req, res) => {
+
   try {
 
     const { email } = req.body;
@@ -51,7 +52,7 @@ export const signupWithOtp = async (req, res) => {
       process.env.EMAIL_USER;
 
     const brevoApiKey =
-      process.env.BREVO_API_KEY;
+      process.env.EMAIL_PASS;
 
     // Check API key
     if (!brevoApiKey) {
@@ -97,6 +98,8 @@ export const signupWithOtp = async (req, res) => {
           "api-key": brevoApiKey,
           "content-type": "application/json",
         },
+
+        timeout: 15000,
       }
     );
 
