@@ -1,5 +1,5 @@
 import User from "../models/User.js";
-import nodemailer from "nodemailer";
+import * as sibApi from "@getbrevo/brevo";
 
 export const signupWithOtp = async (req, res) => {
   try {
@@ -29,38 +29,32 @@ export const signupWithOtp = async (req, res) => {
     await user.save();
     console.log("✅ USER SAVED");
 
-    // ================= BREVO SMTP CONFIG (FIXED) =================
-    const transporter = nodemailer.createTransport({
-      // Agar Render par env variable nahi milega, toh automatic sahi string utha lega
-      host: process.env.EMAIL_HOST || "smtp-relay.brevo.com",
-      port: 587,
-      secure: false, 
-      auth: {
-        user: process.env.EMAIL_USER, 
-        pass: process.env.EMAIL_PASS, 
-      },
-      tls: {
-        rejectUnauthorized: false 
-      }
-    });
+    // ================= BREVO HTTP API CONFIG (NO PORTS REQUIRED) =================
+    let defaultClient = sibApi.ApiClient.instance;
+    let apiKey = defaultClient.authentications['api-key'];
+    apiKey.apiKey = process.env.EMAIL_PASS; // Aapki Brevo SMTP/API Key yahan kaam karegi
 
-    await transporter.sendMail({
-      from: `"Productr" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Your OTP Code",
-      html: `
-        <div style="font-family:sans-serif;padding:20px;">
-          <h2>Your OTP is: ${otp}</h2>
-          <p>This OTP will expire in 5 minutes.</p>
-        </div>
-      `,
-    });
+    let apiInstance = new sibApi.TransactionalEmailsApi();
+    let sendSmtpEmail = new sibApi.SendSmtpEmail();
 
-    console.log("✅ EMAIL SENT SUCCESSFULLY VIA BREVO");
+    sendSmtpEmail.subject = "Your OTP Code";
+    sendSmtpEmail.htmlContent = `
+      <div style="font-family:sans-serif;padding:20px;">
+        <h2>Your OTP is: ${otp}</h2>
+        <p>This OTP will expire in 5 minutes.</p>
+      </div>
+    `;
+    sendSmtpEmail.sender = { "name": "Productr", "email": process.env.EMAIL_USER };
+    sendSmtpEmail.to = [{ "email": email }];
+
+    // API Call se bina kisi port delay ke instantly email send hoga
+    await apiInstance.sendTransacEmail(sendSmtpEmail);
+
+    console.log("✅ EMAIL SENT SUCCESSFULLY VIA BREVO API");
     return res.status(200).json({ message: "OTP sent to email" });
 
   } catch (error) {
-    console.log("❌ SERVER ERROR DURING MAIL:", error);
+    console.log("❌ SERVER ERROR DURING MAIL API:", error);
     return res.status(500).json({ message: error.message });
   }
 };
