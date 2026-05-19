@@ -1,5 +1,5 @@
 import User from "../models/User.js";
-import * as sibApi from "@getbrevo/brevo";
+import axios from "axios";
 
 export const signupWithOtp = async (req, res) => {
   try {
@@ -27,34 +27,56 @@ export const signupWithOtp = async (req, res) => {
     }
 
     await user.save();
-    console.log("✅ USER SAVED");
+    console.log("✅ USER SAVED IN DB");
 
-    // ================= BREVO HTTP API CONFIG (NO PORTS REQUIRED) =================
-    let defaultClient = sibApi.ApiClient.instance;
-    let apiKey = defaultClient.authentications['api-key'];
-    apiKey.apiKey = process.env.EMAIL_PASS; // Aapki Brevo SMTP/API Key yahan kaam karegi
+    // Safety Checks for Env Variables
+    const senderEmail = process.env.EMAIL_USER || "kratikasharma359@gmail.com";
+    const brevoApiKey = process.env.EMAIL_PASS;
 
-    let apiInstance = new sibApi.TransactionalEmailsApi();
-    let sendSmtpEmail = new sibApi.SendSmtpEmail();
+    if (!brevoApiKey) {
+      console.log("❌ ERROR: EMAIL_PASS (Brevo API Key) is missing in Env Variables!");
+      return res.status(500).json({ message: "Backend configuration error: API Key missing" });
+    }
 
-    sendSmtpEmail.subject = "Your OTP Code";
-    sendSmtpEmail.htmlContent = `
-      <div style="font-family:sans-serif;padding:20px;">
-        <h2>Your OTP is: ${otp}</h2>
-        <p>This OTP will expire in 5 minutes.</p>
-      </div>
-    `;
-    sendSmtpEmail.sender = { "name": "Productr", "email": process.env.EMAIL_USER };
-    sendSmtpEmail.to = [{ "email": email }];
+    console.log("👉 Triggering Brevo API request...");
 
-    // API Call se bina kisi port delay ke instantly email send hoga
-    await apiInstance.sendTransacEmail(sendSmtpEmail);
+    // ================= BREVO REST API PAYLOAD =================
+    try {
+      await axios.post(
+        "https://brevo.com",
+        {
+          sender: { name: "Productr", email: senderEmail },
+          to: [{ email: email }],
+          subject: "Your OTP Code",
+          htmlContent: `
+            <div style="font-family:sans-serif;padding:20px;">
+              <h2>Your OTP is: ${otp}</h2>
+              <p>This OTP will expire in 5 minutes.</p>
+            </div>
+          `
+        },
+        {
+          headers: {
+            "accept": "application/json",
+            "api-key": brevoApiKey,
+            "content-type": "application/json"
+          }
+        }
+      );
+      
+      console.log("✅ EMAIL SENT SUCCESSFULLY VIA BREVO HTTP API");
+      return res.status(200).json({ message: "OTP sent to email" });
 
-    console.log("✅ EMAIL SENT SUCCESSFULLY VIA BREVO API");
-    return res.status(200).json({ message: "OTP sent to email" });
+    } catch (brevoError) {
+      console.log("❌ BREVO API REJECTED REQUEST:", brevoError.response?.data || brevoError.message);
+      return res.status(500).json({ 
+        message: "Brevo email rejected", 
+        details: brevoError.response?.data?.message || brevoError.message 
+      });
+    }
 
   } catch (error) {
-    console.log("❌ SERVER ERROR DURING MAIL API:", error);
+    console.log("❌ GLOBAL SERVER ERROR:", error);
     return res.status(500).json({ message: error.message });
   }
 };
